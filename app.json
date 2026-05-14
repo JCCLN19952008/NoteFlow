@@ -26,9 +26,9 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.NoteFlow"
     },
-    
     "plugins": [
       "expo-router"
     ]

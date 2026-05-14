@@ -14,6 +14,7 @@ export type Note = {
   id: string
   title: string
   body: string
+  pinned: boolean
   tags: string[]
   createdAt: number
   updatedAt: number
@@ -24,6 +25,7 @@ type NotesStore = {
   addNote: (note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => void
   updateNote: (id: string, changes: Partial<Pick<Note, 'title' | 'body' | 'tags'>>) => void
   deleteNote: (id: string) => void
+  togglePin: (id: string) => void
 }
 
 export const useNotesStore = create<NotesStore>()(
@@ -50,6 +52,13 @@ export const useNotesStore = create<NotesStore>()(
             n.id === id ? { ...n, ...changes, updatedAt: Date.now() } : n
           ),
         })),
+
+        togglePin: (id: string) =>
+        set((state) => ({
+         notes: state.notes.map((n) =>
+         n.id === id ? { ...n, pinned: !n.pinned, updatedAt: Date.now() } : n
+    ),
+  })),
 
       deleteNote: (id) =>
         set((state) => ({
