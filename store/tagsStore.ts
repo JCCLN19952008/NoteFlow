@@ -1,14 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import { MMKV } from 'react-native-mmkv'
-
-const storage = new MMKV({ id: 'tags-storage' })
-
-const mmkvStorage = {
-  getItem: (name: string) => storage.getString(name) ?? null,
-  setItem: (name: string, value: string) => storage.set(name, value),
-  removeItem: (name: string) => storage.delete(name),
-}
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export type Tag = {
   id: string
@@ -46,7 +38,7 @@ export const useTagsStore = create<TagsStore>()(
     }),
     {
       name: 'tags-storage',
-      storage: createJSONStorage(() => mmkvStorage),
+      storage: createJSONStorage(() => AsyncStorage),
     }
   )
 )

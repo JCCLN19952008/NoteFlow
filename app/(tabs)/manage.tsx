@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import { FlashList } from '@shopify/flash-list'
-import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable'
 import * as Haptics from 'expo-haptics'
 import { useTagsStore, Tag } from '@/store/tagsStore'
 
@@ -21,22 +20,26 @@ function DeleteAction({ onDelete }: { onDelete: () => void }) {
 function TagRow({ tag }: { tag: Tag }) {
   const deleteTag = useTagsStore((state) => state.deleteTag)
 
+  const handleDelete = () => {
+    Alert.alert('Delete Tag', `Delete "${tag.label}"?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning)
+          deleteTag(tag.id)
+        },
+      },
+    ])
+  }
+
   return (
-    <ReanimatedSwipeable
-      renderRightActions={() => (
-        <DeleteAction
-          onDelete={() => {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning)
-            deleteTag(tag.id)
-          }}
-        />
-      )}
-    >
-      <View style={styles.tagRow}>
-        <View style={[styles.tagColorDot, { backgroundColor: tag.color }]} />
-        <Text style={styles.tagLabel}>{tag.label}</Text>
-      </View>
-    </ReanimatedSwipeable>
+    <TouchableOpacity style={styles.tagRow} onLongPress={handleDelete}>
+      <View style={[styles.tagColorDot, { backgroundColor: tag.color }]} />
+      <Text style={styles.tagLabel}>{tag.label}</Text>
+      <Text style={styles.deleteHint}>Hold to delete</Text>
+    </TouchableOpacity>
   )
 }
 
@@ -128,6 +131,7 @@ const styles = StyleSheet.create({
   tagLabel: { fontSize: 16, color: '#212121' },
   deleteAction: { backgroundColor: '#E53935', justifyContent: 'center', alignItems: 'center', width: 80 },
   deleteActionText: { color: '#fff', fontWeight: '600', fontSize: 14 },
+  deleteHint: { marginLeft: 'auto', fontSize: 11, color: '#BDBDBD' },
   empty: { alignItems: 'center', marginTop: 40 },
   emptyText: { fontSize: 16, fontWeight: '600', color: '#9E9E9E' },
   emptySubtext: { fontSize: 14, color: '#BDBDBD', marginTop: 6 },

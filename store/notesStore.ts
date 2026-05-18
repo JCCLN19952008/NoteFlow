@@ -1,21 +1,13 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import { MMKV } from 'react-native-mmkv'
-
-const storage = new MMKV()
-
-const mmkvStorage = {
-  getItem: (name: string) => storage.getString(name) ?? null,
-  setItem: (name: string, value: string) => storage.set(name, value),
-  removeItem: (name: string) => storage.delete(name),
-}
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export type Note = {
   id: string
   title: string
   body: string
-  pinned: boolean
   tags: string[]
+  pinned: boolean
   createdAt: number
   updatedAt: number
 }
@@ -53,21 +45,21 @@ export const useNotesStore = create<NotesStore>()(
           ),
         })),
 
-        togglePin: (id: string) =>
-        set((state) => ({
-         notes: state.notes.map((n) =>
-         n.id === id ? { ...n, pinned: !n.pinned, updatedAt: Date.now() } : n
-    ),
-  })),
-
       deleteNote: (id) =>
         set((state) => ({
           notes: state.notes.filter((n) => n.id !== id),
         })),
+
+      togglePin: (id) =>
+        set((state) => ({
+          notes: state.notes.map((n) =>
+            n.id === id ? { ...n, pinned: !n.pinned, updatedAt: Date.now() } : n
+          ),
+        })),
     }),
     {
       name: 'notes-storage',
-      storage: createJSONStorage(() => mmkvStorage),
+      storage: createJSONStorage(() => AsyncStorage),
     }
   )
 )
