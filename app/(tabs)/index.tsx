@@ -1,12 +1,15 @@
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import { router } from 'expo-router'
 import { FlashList } from '@shopify/flash-list'
 import * as Haptics from 'expo-haptics'
 import { useNotesStore, Note } from '@/store/notesStore'
+import { useState } from 'react'
+import { useTagsStore } from '@/store/tagsStore'
+import { View, Text, TouchableOpacity, StyleSheet, Alert, TextInput } from 'react-native'
 
 function NoteCard({ note }: { note: Note }) {
   const deleteNote = useNotesStore((state) => state.deleteNote)
   const togglePin = useNotesStore((state) => state.togglePin)
+  const tags = useTagsStore((state) => state.tags)
 
   const handleLongPress = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning)
@@ -43,20 +46,36 @@ function NoteCard({ note }: { note: Note }) {
       <Text style={styles.cardTitle} numberOfLines={1}>{note.title}</Text>
       <Text style={styles.cardBody} numberOfLines={2}>{note.body}</Text>
       {note.tags.length > 0 && (
-        <Text style={styles.cardTags}>{note.tags.length} tag{note.tags.length > 1 ? 's' : ''}</Text>
-      )}
+      <View style={styles.cardTagDots}>
+        {note.tags.slice(0, 5).map((tagId) => {
+          const tag = tags.find((t) => t.id === tagId)
+          if (!tag) return null
+          return <View key={tagId} style={[styles.cardTagDot, { backgroundColor: tag.color }]} />
+        })}
+      </View>
+    )}
+      <Text style={styles.cardDate}>
+  {new Date(note.updatedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+</Text>
     </TouchableOpacity>
   )
 }
 
 export default function NotesScreen() {
   const notes = useNotesStore((state) => state.notes)
+  
 
   const sortedNotes = [...notes].sort((a, b) => {
     if (a.pinned && !b.pinned) return -1
     if (!a.pinned && b.pinned) return 1
     return b.createdAt - a.createdAt
   })
+  const [search, setSearch] = useState('')
+
+const filteredNotes = sortedNotes.filter((note) =>
+  note.title.toLowerCase().includes(search.toLowerCase()) ||
+  note.body.toLowerCase().includes(search.toLowerCase())
+)
 
   return (
     <View style={styles.container}>
@@ -71,16 +90,26 @@ export default function NotesScreen() {
           <Text style={styles.addButton}>+ New</Text>
         </TouchableOpacity>
       </View>
+      <TextInput
+  style={styles.searchInput}
+  placeholder="Search notes..."
+  value={search}
+  onChangeText={setSearch}
+  clearButtonMode="while-editing"
+/>
 
       <FlashList
-        data={sortedNotes}
+        data={filteredNotes}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <NoteCard note={item} />}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>No notes yet.</Text>
-            <Text style={styles.emptySubtext}>Tap + New to get started.</Text>
-          </View>
+    <Text style={styles.emptyIcon}>📝</Text>
+    <Text style={styles.emptyText}>No notes yet.</Text>
+    <Text style={styles.emptySubtext}>
+      {search.length > 0 ? 'No notes match your search.' : 'Tap + New to get started.'}
+    </Text>
+  </View>
         }
       />
     </View>
@@ -91,14 +120,19 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', paddingTop: 60 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 16 },
   heading: { fontSize: 28, fontWeight: '700' },
+  searchInput: { marginHorizontal: 20, marginBottom: 16, padding: 12, borderRadius: 10, backgroundColor: '#F5F5F5', fontSize: 15, color: '#212121' },
   addButton: { fontSize: 16, color: '#6C47FF', fontWeight: '600' },
   card: { marginHorizontal: 20, marginBottom: 12, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: '#E0E0E0', backgroundColor: '#fff' },
+  cardDate: { fontSize: 11, color: '#BDBDBD', marginTop: 4 },
   cardPinned: { borderColor: '#6C47FF', backgroundColor: '#F9F7FF' },
   pinnedLabel: { fontSize: 11, color: '#6C47FF', marginBottom: 4, fontWeight: '500' },
   cardTitle: { fontSize: 16, fontWeight: '600', marginBottom: 4 },
   cardBody: { fontSize: 14, color: '#757575', marginBottom: 6 },
   cardTags: { fontSize: 12, color: '#9E9E9E' },
   empty: { alignItems: 'center', marginTop: 80 },
-  emptyText: { fontSize: 18, fontWeight: '600', color: '#9E9E9E' },
-  emptySubtext: { fontSize: 14, color: '#BDBDBD', marginTop: 6 },
+  cardTagDots: { flexDirection: 'row', gap: 4, marginTop: 6 },
+cardTagDot: { width: 8, height: 8, borderRadius: 4 },
+emptyIcon: { fontSize: 48, marginBottom: 12 },
+emptyText: { fontSize: 18, fontWeight: '600', color: '#9E9E9E' },
+emptySubtext: { fontSize: 14, color: '#BDBDBD', marginTop: 6, textAlign: 'center', paddingHorizontal: 40 },
 })

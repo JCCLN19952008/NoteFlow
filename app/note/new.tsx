@@ -35,7 +35,7 @@ export default function NewNoteScreen() {
     }
 
     setErrors({})
-    addNote({ title, body, tags: selectedTags })
+    addNote({ title, body, tags: selectedTags, pinned: false })
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
     router.back()
   }
@@ -67,22 +67,30 @@ export default function NewNoteScreen() {
         onChangeText={setBody}
         multiline
       />
+      <Text style={styles.wordCount}>
+  {body.trim() === '' ? '0 words' : `${body.trim().split(/\s+/).length} words`}
+</Text>
       {errors.body && <Text style={styles.errorText}>{errors.body}</Text>}
 
       {tags.length > 0 && (
         <View style={styles.tagsRow}>
           {tags.map((tag) => (
             <TouchableOpacity
-              key={tag.id}
-              onPress={() => toggleTag(tag.id)}
-              style={[
-                styles.tag,
-                { backgroundColor: tag.color },
-                selectedTags.includes(tag.id) && styles.tagSelected,
-              ]}
-            >
-              <Text style={styles.tagLabel}>{tag.label}</Text>
-            </TouchableOpacity>
+  key={tag.id}
+  onPress={() => toggleTag(tag.id)}
+  activeOpacity={1}
+  style={[
+    styles.tag,
+    selectedTags.includes(tag.id)
+      ? { backgroundColor: tag.color }
+      : { backgroundColor: '#E8E8E8' },
+  ]}
+>
+  <Text style={[
+    styles.tagLabel,
+    { color: selectedTags.includes(tag.id) ? '#fff' : '#555' }
+  ]}>{tag.label}</Text>
+</TouchableOpacity>
           ))}
         </View>
       )}
@@ -100,8 +108,8 @@ const styles = StyleSheet.create({
   bodyInput: { height: 200, textAlignVertical: 'top' },
   inputError: { borderColor: '#E53935' },
   errorText: { color: '#E53935', fontSize: 12, marginBottom: 12 },
+  wordCount: { fontSize: 11, color: '#BDBDBD', textAlign: 'right', marginBottom: 8 },
   tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16 },
-  tag: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, opacity: 0.5 },
-  tagSelected: { opacity: 1 },
-  tagLabel: { color: '#fff', fontSize: 13, fontWeight: '500' },
+  tag: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, marginRight: 6, marginBottom: 6 },
+tagLabel: { fontSize: 13, fontWeight: '600' },
 })

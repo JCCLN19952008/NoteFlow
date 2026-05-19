@@ -5,6 +5,8 @@ import * as Haptics from 'expo-haptics'
 import { useNotesStore } from '@/store/notesStore'
 import { useTagsStore } from '@/store/tagsStore'
 
+
+const QUICK_NOTE_LIMIT = 50
 export default function QuickScreen() {
   const [body, setBody] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -41,12 +43,20 @@ export default function QuickScreen() {
 
       <View style={styles.inputSection}>
         <TextInput
-          style={styles.input}
-          placeholder="Jot something down..."
-          value={body}
-          onChangeText={setBody}
-          multiline
+      style={styles.input}
+      placeholder="Jot something down..."
+      value={body}
+      onChangeText={setBody}
+      multiline
+      maxLength={QUICK_NOTE_LIMIT}
         />
+        <Text style={[
+          styles.charCount,
+          body.length > 250 && styles.charCountWarning,
+          body.length === QUICK_NOTE_LIMIT && styles.charCountLimit,
+        ]}>
+            {body.length}/{QUICK_NOTE_LIMIT}
+          </Text>
 
         {tags.length > 0 && (
           <View style={styles.tagsRow}>
@@ -134,4 +144,7 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', marginTop: 40 },
   emptyText: { fontSize: 16, fontWeight: '600', color: '#9E9E9E' },
   emptySubtext: { fontSize: 14, color: '#BDBDBD', marginTop: 6 },
+  charCount: { fontSize: 11, color: '#BDBDBD', textAlign: 'right', marginBottom: 8 },
+  charCountWarning: { color: '#FB8C00' },
+  charCountLimit: { color: '#E53935' },
 })
