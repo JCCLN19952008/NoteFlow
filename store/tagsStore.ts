@@ -1,44 +1,39 @@
 import { create } from 'zustand'
-import { persist, createJSONStorage } from 'zustand/middleware'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-
-export type Tag = {
-  id: string
-  label: string
-  color: string
-}
+import { api, Tag } from '@/services/api'
 
 type TagsStore = {
   tags: Tag[]
-  addTag: (label: string, color: string) => void
-  deleteTag: (id: string) => void
+  loading: boolean
+  fetchTags: () => Promise<void>
+  addTag: (label: string, color: string) => Promise<void>
+  deleteTag: (id: string) => Promise<void>
 }
 
-export const useTagsStore = create<TagsStore>()(
-  persist(
-    (set) => ({
-      tags: [],
+export type { Tag }
 
-      addTag: (label, color) =>
-        set((state) => ({
-          tags: [
-            ...state.tags,
-            {
-              id: Date.now().toString(),
-              label,
-              color,
-            },
-          ],
-        })),
+export const useTagsStore = create<TagsStore>()((set) => ({
+  tags: [],
+  loading: false,
 
-      deleteTag: (id) =>
-        set((state) => ({
-          tags: state.tags.filter((t) => t.id !== id),
-        })),
-    }),
-    {
-      name: 'tags-storage',
-      storage: createJSONStorage(() => AsyncStorage),
+  fetchTags: async () => {
+    set({ loading: true })
+    try {
+      const tags = await api.getTags()
+      set({ tags })
+    } finally {
+      set({ loading: false })
     }
-  )
-)
+  },
+
+  addTag: async (label, color) => {
+    const tag = await api.createTag({ label, color })
+    set((state) => ({ tags: [...state.tags, tag] }))
+  },
+
+  deleteTag: async (id) => {
+    await api.deleteTag(id)
+    set((state) => ({
+      tags: state.tags.filter((t) => t.id !== id),
+    }))
+  },
+}))

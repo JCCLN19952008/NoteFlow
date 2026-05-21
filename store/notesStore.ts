@@ -1,65 +1,55 @@
 import { create } from 'zustand'
-import { persist, createJSONStorage } from 'zustand/middleware'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-
-export type Note = {
-  id: string
-  title: string
-  body: string
-  tags: string[]
-  pinned: boolean
-  createdAt: number
-  updatedAt: number
-}
+import { api, Note } from '@/services/api'
 
 type NotesStore = {
   notes: Note[]
-  addNote: (note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => void
-  updateNote: (id: string, changes: Partial<Pick<Note, 'title' | 'body' | 'tags'>>) => void
-  deleteNote: (id: string) => void
-  togglePin: (id: string) => void
+  loading: boolean
+  fetchNotes: () => Promise<void>
+  addNote: (data: { title: string; body: string; tags: string[]; pinned: boolean }) => Promise<void>
+  updateNote: (id: string, changes: { title: string; body: string; tags: string[] }) => Promise<void>
+  deleteNote: (id: string) => Promise<void>
+  togglePin: (id: string) => Promise<void>
 }
 
-export const useNotesStore = create<NotesStore>()(
-  persist(
-    (set) => ({
-      notes: [],
+export type { Note }
 
-      addNote: (note) =>
-        set((state) => ({
-          notes: [
-            ...state.notes,
-            {
-              ...note,
-              id: Date.now().toString(),
-              createdAt: Date.now(),
-              updatedAt: Date.now(),
-            },
-          ],
-        })),
+export const useNotesStore = create<NotesStore>()((set) => ({
+  notes: [],
+  loading: false,
 
-      updateNote: (id, changes) =>
-        set((state) => ({
-          notes: state.notes.map((n) =>
-            n.id === id ? { ...n, ...changes, updatedAt: Date.now() } : n
-          ),
-        })),
-
-      deleteNote: (id) =>
-        set((state) => ({
-          notes: state.notes.filter((n) => n.id !== id),
-        })),
-
-      togglePin: (id) =>
-        set((state) => ({
-          notes: state.notes.map((n) =>
-            n.id === id ? { ...n, pinned: !n.pinned, updatedAt: Date.now() } : n
-          ),
-        })),
-    }),
-    {
-      name: 'notes-storage',
-      storage: createJSONStorage(() => AsyncStorage),
+  fetchNotes: async () => {
+    set({ loading: true })
+    try {
+      const notes = await api.getNotes()
+      set({ notes })
+    } finally {
+      set({ loading: false })
     }
-  )
-)
+  },
+
+  addNote: async (data) => {
+    const note = await api.createNote(data)
+    set((state) => ({ notes: [note, ...state.notes] }))
+  },
+
+  updateNote: async (id, changes) => {
+    const updated = await api.updateNote(id, changes)
+    set((state) => ({
+      notes: state.notes.map((n) => (n.id === id ? updated : n)),
+    }))
+  },
+
+  deleteNote: async (id) => {
+    await api.deleteNote(id)
+    set((state) => ({
+      notes: state.notes.filter((n) => n.id !== id),
+    }))
+  },
+
+  togglePin: async (id) => {
+    const updated = await api.togglePin(id)
+    set((state) => ({
+      notes: state.notes.map((n) => (n.id === id ? updated : n)),
+    }))
+  },
+}))
