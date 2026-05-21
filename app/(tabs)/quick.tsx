@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, Pressable, StyleSheet, Alert } from 'react-native'
 import { FlashList } from '@shopify/flash-list'
 import * as Haptics from 'expo-haptics'
 import { useNotesStore } from '@/store/notesStore'
 import { useTagsStore } from '@/store/tagsStore'
 
-
 const QUICK_NOTE_LIMIT = 50
+
 export default function QuickScreen() {
   const [body, setBody] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -17,21 +17,22 @@ export default function QuickScreen() {
 
   const quickNotes = notes
     .filter((n) => n.title === '__quick__')
-    .sort((a, b) => b.createdAt - a.createdAt)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
   const toggleTag = (id: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
-    )
+    setSelectedTags((prev) => {
+      const next = prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
+      return next
+    })
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (body.trim().length === 0) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
       Alert.alert('Note body is required')
       return
     }
-    addNote({ title: '__quick__', body: body.trim(), tags: selectedTags, pinned: false })
+    await addNote({ title: '__quick__', body: body.trim(), tags: selectedTags, pinned: false })
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
     setBody('')
     setSelectedTags([])
@@ -43,39 +44,46 @@ export default function QuickScreen() {
 
       <View style={styles.inputSection}>
         <TextInput
-      style={styles.input}
-      placeholder="Jot something down..."
-      value={body}
-      onChangeText={setBody}
-      multiline
-      maxLength={QUICK_NOTE_LIMIT}
+          style={styles.input}
+          placeholder="Jot something down..."
+          value={body}
+          onChangeText={setBody}
+          multiline
+          maxLength={QUICK_NOTE_LIMIT}
         />
         <Text style={[
           styles.charCount,
           body.length > 250 && styles.charCountWarning,
           body.length === QUICK_NOTE_LIMIT && styles.charCountLimit,
         ]}>
-            {body.length}/{QUICK_NOTE_LIMIT}
-          </Text>
+          {body.length}/{QUICK_NOTE_LIMIT}
+        </Text>
 
         {tags.length > 0 && (
           <View style={styles.tagsRow}>
-            {tags.map((tag) => (
-              <TouchableOpacity
-                key={tag.id}
-                onPress={() => {
-                  toggleTag(tag.id)
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-                }}
-                style={[
-                  styles.tag,
-                  { backgroundColor: tag.color },
-                  selectedTags.includes(tag.id) && styles.tagSelected,
-                ]}
-              >
-                <Text style={styles.tagLabel}>{tag.label}</Text>
-              </TouchableOpacity>
-            ))}
+            {tags.map((tag) => {
+              const isSelected = selectedTags.includes(tag.id)
+              return (
+                <Pressable
+                  key={tag.id}
+                  onPress={() => {
+                    toggleTag(tag.id)
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+                  }}
+                  style={[
+                    styles.tag,
+                    isSelected
+                      ? { backgroundColor: tag.color }
+                      : { backgroundColor: '#E8E8E8' },
+                  ]}
+                >
+                  <Text style={[
+                    { fontSize: 13, fontWeight: '500' },
+                    { color: isSelected ? '#fff' : '#555' }
+                  ]}>{tag.label}</Text>
+                </Pressable>
+              )
+            })}
           </View>
         )}
 
@@ -93,18 +101,14 @@ export default function QuickScreen() {
             <Text style={styles.cardBody}>{item.body}</Text>
             {item.tags.length > 0 && (
               <View style={styles.cardTagsRow}>
-                {item.tags.map((tagId) => {
-                  const tag = tags.find((t) => t.id === tagId)
-                  if (!tag) return null
-                  return (
-                    <View
-                      key={tagId}
-                      style={[styles.cardTag, { backgroundColor: tag.color }]}
-                    >
-                      <Text style={styles.cardTagLabel}>{tag.label}</Text>
-                    </View>
-                  )
-                })}
+                {item.tags.map((tag) => (
+                  <View
+                    key={tag.id}
+                    style={[styles.cardTag, { backgroundColor: tag.color }]}
+                  >
+                    <Text style={styles.cardTagLabel}>{tag.label}</Text>
+                  </View>
+                ))}
               </View>
             )}
             <Text style={styles.cardDate}>
@@ -129,9 +133,8 @@ const styles = StyleSheet.create({
   inputSection: { marginBottom: 28 },
   input: { borderWidth: 1, borderColor: '#E0E0E0', borderRadius: 8, padding: 12, fontSize: 16, minHeight: 100, textAlignVertical: 'top', marginBottom: 12 },
   tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
-  tag: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, opacity: 0.4 },
-  tagSelected: { opacity: 1 },
-  tagLabel: { color: '#fff', fontSize: 13, fontWeight: '500' },
+  tag: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
+  tagSelected: {},
   saveButton: { backgroundColor: '#6C47FF', borderRadius: 8, padding: 14, alignItems: 'center' },
   saveButtonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
   sectionTitle: { fontSize: 16, fontWeight: '600', marginBottom: 12, color: '#424242' },

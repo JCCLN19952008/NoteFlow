@@ -28,16 +28,16 @@ export const useNotesStore = create<NotesStore>()((set) => ({
   },
 
   addNote: async (data) => {
-    const note = await api.createNote(data)
-    set((state) => ({ notes: [note, ...state.notes] }))
-  },
+  await api.createNote(data)
+  const notes = await api.getNotes()
+  set({ notes })
+},
 
   updateNote: async (id, changes) => {
-    const updated = await api.updateNote(id, changes)
-    set((state) => ({
-      notes: state.notes.map((n) => (n.id === id ? updated : n)),
-    }))
-  },
+  await api.updateNote(id, changes)
+  const notes = await api.getNotes()
+  set({ notes })
+},
 
   deleteNote: async (id) => {
     await api.deleteNote(id)

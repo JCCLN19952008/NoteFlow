@@ -18,7 +18,7 @@ export default function NoteDetailScreen() {
 
   const [title, setTitle] = useState(note?.title ?? '')
   const [body, setBody] = useState(note?.body ?? '')
-  const [selectedTags, setSelectedTags] = useState<string[]>(note?.tags ?? [])
+  const [selectedTags, setSelectedTags] = useState<string[]>(note?.tags?.map((t) => t.id) ?? [])
   const [errors, setErrors] = useState<{ title?: string; body?: string }>({})
 
   if (!note) {
@@ -35,9 +35,8 @@ export default function NoteDetailScreen() {
     )
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const result = noteSchema.safeParse({ title, body, tags: selectedTags })
-
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors
       setErrors({
@@ -47,9 +46,8 @@ export default function NoteDetailScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
       return
     }
-
     setErrors({})
-    updateNote(id, { title, body, tags: selectedTags })
+    await updateNote(id, { title, body, tags: selectedTags })
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
     router.back()
   }

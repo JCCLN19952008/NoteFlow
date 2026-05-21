@@ -46,14 +46,12 @@ function NoteCard({ note }: { note: Note }) {
       <Text style={styles.cardTitle} numberOfLines={1}>{note.title}</Text>
       <Text style={styles.cardBody} numberOfLines={2}>{note.body}</Text>
       {note.tags.length > 0 && (
-      <View style={styles.cardTagDots}>
-        {note.tags.slice(0, 5).map((tagId) => {
-          const tag = tags.find((t) => t.id === tagId)
-          if (!tag) return null
-          return <View key={tagId} style={[styles.cardTagDot, { backgroundColor: tag.color }]} />
-        })}
-      </View>
-    )}
+  <View style={styles.cardTagDots}>
+    {note.tags.slice(0, 5).map((tag) => (
+      <View key={tag.id} style={[styles.cardTagDot, { backgroundColor: tag.color }]} />
+    ))}
+  </View>
+)}
       <Text style={styles.cardDate}>
   {new Date(note.updatedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
 </Text>
@@ -63,13 +61,13 @@ function NoteCard({ note }: { note: Note }) {
 
 export default function NotesScreen() {
   const notes = useNotesStore((state) => state.notes)
-  
-
   const sortedNotes = [...notes].sort((a, b) => {
     if (a.pinned && !b.pinned) return -1
     if (!a.pinned && b.pinned) return 1
-    return b.createdAt - a.createdAt
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   })
+
+  
   const [search, setSearch] = useState('')
 
 const filteredNotes = sortedNotes.filter((note) =>

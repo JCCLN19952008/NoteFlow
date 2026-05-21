@@ -21,9 +21,8 @@ export default function NewNoteScreen() {
     )
   }
 
-  const handleSave = () => {
+ const handleSave = async () => {
     const result = noteSchema.safeParse({ title, body, tags: selectedTags })
-
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors
       setErrors({
@@ -33,9 +32,8 @@ export default function NewNoteScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
       return
     }
-
     setErrors({})
-    addNote({ title, body, tags: selectedTags, pinned: false })
+    await addNote({ title, body, tags: selectedTags, pinned: false })
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
     router.back()
   }
