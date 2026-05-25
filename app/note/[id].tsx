@@ -18,7 +18,9 @@ export default function NoteDetailScreen() {
 
   const [title, setTitle] = useState(note?.title ?? '')
   const [body, setBody] = useState(note?.body ?? '')
-  const [selectedTags, setSelectedTags] = useState<string[]>(note?.tags?.map((t) => t.id) ?? [])
+  const [selectedTags, setSelectedTags] = useState<string[]>(
+    note?.tags?.map((t) => t.id).filter((id) => tags.some((tag) => tag.id === id)) ?? []
+  )
   const [errors, setErrors] = useState<{ title?: string; body?: string }>({})
 
   if (!note) {

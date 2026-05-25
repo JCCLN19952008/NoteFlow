@@ -26,7 +26,7 @@ export default function RootLayout() {
       router.replace('/auth')
     } else {
       fetchNotes(user.uid)
-      fetchTags()
+      fetchTags(user.uid)
       router.replace('/(tabs)')
     }
   }, [user, initialising])

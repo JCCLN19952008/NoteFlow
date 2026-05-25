@@ -70,13 +70,13 @@ export const api = {
   },
 
   // Tags
-  getTags: async (): Promise<Tag[]> => {
-    const res = await fetch(`${BASE_URL}/api/tags`)
+  getTags: async (userId: string): Promise<Tag[]> => {
+    const res = await fetch(`${BASE_URL}/api/tags?userId=${userId}`)
     if (!res.ok) throw new Error('Failed to fetch tags')
     return res.json()
   },
 
-  createTag: async (data: { label: string; color: string }): Promise<Tag> => {
+  createTag: async (data: { label: string; color: string; userId: string }): Promise<Tag> => {
     const res = await fetch(`${BASE_URL}/api/tags`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

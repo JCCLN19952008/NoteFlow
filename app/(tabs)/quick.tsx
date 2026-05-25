@@ -4,6 +4,7 @@ import { FlashList } from '@shopify/flash-list'
 import * as Haptics from 'expo-haptics'
 import { useNotesStore } from '@/store/notesStore'
 import { useTagsStore } from '@/store/tagsStore'
+import auth from '@react-native-firebase/auth'
 
 const QUICK_NOTE_LIMIT = 50
 
@@ -26,13 +27,14 @@ export default function QuickScreen() {
     })
   }
 
-  const handleSave = async () => {
+ const handleSave = async () => {
     if (body.trim().length === 0) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
       Alert.alert('Note body is required')
       return
     }
-    await addNote({ title: '__quick__', body: body.trim(), tags: selectedTags, pinned: false })
+    const userId = auth().currentUser?.uid ?? ''
+    await addNote({ title: '__quick__', body: body.trim(), tags: selectedTags, pinned: false, userId })
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
     setBody('')
     setSelectedTags([])

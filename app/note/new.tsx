@@ -5,6 +5,7 @@ import * as Haptics from 'expo-haptics'
 import { useNotesStore } from '@/store/notesStore'
 import { useTagsStore } from '@/store/tagsStore'
 import { noteSchema } from '@/schemas/noteSchema'
+import auth from '@react-native-firebase/auth'
 
 export default function NewNoteScreen() {
   const [title, setTitle] = useState('')
@@ -33,8 +34,8 @@ export default function NewNoteScreen() {
       return
     }
     setErrors({})
-    const userId = useNotesStore.getState().userId
-    await addNote({ title, body, tags: selectedTags, pinned: false, userId: userId ?? '' })
+    const userId = auth().currentUser?.uid ?? ''
+    await addNote({ title, body, tags: selectedTags, pinned: false, userId })
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
     router.back()
   }

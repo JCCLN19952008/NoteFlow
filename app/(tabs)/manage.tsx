@@ -5,6 +5,7 @@ import * as Haptics from 'expo-haptics'
 import { useTagsStore, Tag } from '@/store/tagsStore'
 import auth from '@react-native-firebase/auth'
 
+
 const PRESET_COLORS = [
   '#6C47FF', '#E53935', '#43A047', '#FB8C00',
   '#00ACC1', '#8E24AA', '#F4511E', '#3949AB',
@@ -61,7 +62,8 @@ export default function ManageScreen() {
       Alert.alert('A tag with that name already exists')
       return
     }
-    addTag(label.trim(), selectedColor)
+    const userId = auth().currentUser?.uid ?? ''
+    addTag(label.trim(), selectedColor, userId)
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
     setLabel('')
   }
