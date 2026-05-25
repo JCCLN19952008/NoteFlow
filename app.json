@@ -21,6 +21,7 @@
       "favicon": "./assets/favicon.png"
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -30,7 +31,9 @@
       "package": "com.anonymous.NoteFlow"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth"
     ]
   }
 }

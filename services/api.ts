@@ -19,8 +19,8 @@ export type Tag = {
 
 export const api = {
   // Notes
-  getNotes: async (): Promise<Note[]> => {
-    const res = await fetch(`${BASE_URL}/api/notes`)
+  getNotes: async (userId: string): Promise<Note[]> => {
+    const res = await fetch(`${BASE_URL}/api/notes?userId=${userId}`)
     if (!res.ok) throw new Error('Failed to fetch notes')
     return res.json()
   },
@@ -30,6 +30,7 @@ export const api = {
     body: string
     tags: string[]
     pinned: boolean
+    userId: string
   }): Promise<Note> => {
     const res = await fetch(`${BASE_URL}/api/notes`, {
       method: 'POST',

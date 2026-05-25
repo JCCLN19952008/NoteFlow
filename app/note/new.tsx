@@ -33,7 +33,8 @@ export default function NewNoteScreen() {
       return
     }
     setErrors({})
-    await addNote({ title, body, tags: selectedTags, pinned: false })
+    const userId = useNotesStore.getState().userId
+    await addNote({ title, body, tags: selectedTags, pinned: false, userId: userId ?? '' })
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
     router.back()
   }

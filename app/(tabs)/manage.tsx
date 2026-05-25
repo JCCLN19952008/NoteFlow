@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'reac
 import { FlashList } from '@shopify/flash-list'
 import * as Haptics from 'expo-haptics'
 import { useTagsStore, Tag } from '@/store/tagsStore'
+import auth from '@react-native-firebase/auth'
 
 const PRESET_COLORS = [
   '#6C47FF', '#E53935', '#43A047', '#FB8C00',
@@ -67,7 +68,12 @@ export default function ManageScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Manage</Text>
+      <View style={styles.headerRow}>
+  <Text style={styles.heading}>Manage</Text>
+  <TouchableOpacity onPress={() => auth().signOut()}>
+    <Text style={styles.logoutButton}>Log out</Text>
+  </TouchableOpacity>
+</View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>New Tag</Text>
@@ -117,7 +123,7 @@ export default function ManageScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', paddingTop: 60, paddingHorizontal: 20 },
-  heading: { fontSize: 28, fontWeight: '700', marginBottom: 24 },
+  heading: { fontSize: 28, fontWeight: '700'},
   section: { marginBottom: 32 },
   sectionTitle: { fontSize: 16, fontWeight: '600', marginBottom: 12, color: '#424242' },
   input: { borderWidth: 1, borderColor: '#E0E0E0', borderRadius: 8, padding: 12, fontSize: 16, marginBottom: 12 },
@@ -135,4 +141,6 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', marginTop: 40 },
   emptyText: { fontSize: 16, fontWeight: '600', color: '#9E9E9E' },
   emptySubtext: { fontSize: 14, color: '#BDBDBD', marginTop: 6 },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
+logoutButton: { fontSize: 14, color: '#E53935', fontWeight: '600' },
 })
