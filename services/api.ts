@@ -5,6 +5,7 @@ export type Note = {
   title: string
   body: string
   pinned: boolean
+  imageUrl: string | null
   createdAt: string
   updatedAt: string
   tags: Tag[]
@@ -43,7 +44,7 @@ export const api = {
 
   updateNote: async (
     id: string,
-    data: { title: string; body: string; tags: string[] }
+    data: { title: string; body: string; tags: string[]; imageUrl?: string | null }
   ): Promise<Note> => {
     const res = await fetch(`${BASE_URL}/api/notes/${id}`, {
       method: 'PATCH',

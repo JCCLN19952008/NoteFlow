@@ -5,6 +5,10 @@ import * as Haptics from 'expo-haptics'
 import { useNotesStore } from '@/store/notesStore'
 import { useTagsStore } from '@/store/tagsStore'
 import { noteSchema } from '@/schemas/noteSchema'
+import * as ImagePicker from 'expo-image-picker'
+import { uploadImageToS3 } from '@/services/s3'
+import { Image } from 'react-native'
+import auth from '@react-native-firebase/auth'
 
 export default function NoteDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -22,7 +26,8 @@ export default function NoteDetailScreen() {
     note?.tags?.map((t) => t.id).filter((id) => tags.some((tag) => tag.id === id)) ?? []
   )
   const [errors, setErrors] = useState<{ title?: string; body?: string }>({})
-
+  const [imageUrl, setImageUrl] = useState<string | null>(note?.imageUrl ?? null)
+  
   if (!note) {
     return (
       <View style={styles.container}>
@@ -37,6 +42,21 @@ export default function NoteDetailScreen() {
     )
   }
 
+  const handlePickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    })
+
+    if (!result.canceled) {
+      const userId = auth().currentUser?.uid ?? ''
+      const url = await uploadImageToS3(result.assets[0].uri, userId)
+      setImageUrl(url)
+    }
+  }
+
   const handleSave = async () => {
     const result = noteSchema.safeParse({ title, body, tags: selectedTags })
     if (!result.success) {
@@ -49,7 +69,7 @@ export default function NoteDetailScreen() {
       return
     }
     setErrors({})
-    await updateNote(id, { title, body, tags: selectedTags })
+    await updateNote(id, { title, body, tags: selectedTags, imageUrl })
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
     router.back()
   }
@@ -123,6 +143,19 @@ export default function NoteDetailScreen() {
           ))}
         </View>
       )}
+ <TouchableOpacity style={styles.imageButton} onPress={handlePickImage}>
+        <Text style={styles.imageButtonText}>
+          {imageUrl ? 'Change Image' : '+ Add Image'}
+        </Text>
+      </TouchableOpacity>
+
+      {imageUrl && (
+        <Image
+          source={{ uri: imageUrl }}
+          style={styles.imagePreview}
+          resizeMode="cover"
+        />
+      )}      
 
       <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
         <Text style={styles.deleteText}>Delete Note</Text>
@@ -144,7 +177,11 @@ const styles = StyleSheet.create({
   wordCount: { fontSize: 11, color: '#BDBDBD', textAlign: 'right', marginBottom: 8 },
   tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16 },
   tag: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, marginRight: 6, marginBottom: 6 },
-tagLabel: { fontSize: 13, fontWeight: '600' },
+  tagLabel: { fontSize: 13, fontWeight: '600' },
   deleteButton: { marginTop: 32, alignItems: 'center' },
   deleteText: { color: '#E53935', fontSize: 16, fontWeight: '500' },
+  imageButton: { marginTop: 16, borderWidth: 1, borderColor: '#6C47FF', borderRadius: 8, padding: 12, alignItems: 'center' },
+  imageButtonText: { color: '#6C47FF', fontWeight: '600', fontSize: 14 },
+  imagePreview: { width: '100%', height: 200, borderRadius: 8, marginTop: 12 },
+
 })

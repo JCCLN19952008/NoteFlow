@@ -8,7 +8,7 @@ type NotesStore = {
   setUserId: (userId: string) => void
   fetchNotes: (userId: string) => Promise<void>
   addNote: (data: { title: string; body: string; tags: string[]; pinned: boolean; userId: string }) => Promise<void>
-  updateNote: (id: string, changes: { title: string; body: string; tags: string[] }) => Promise<void>
+  updateNote: (id: string, changes: { title: string; body: string; tags: string[]; imageUrl?: string | null }) => Promise<void>
   deleteNote: (id: string) => Promise<void>
   togglePin: (id: string) => Promise<void>
 }
