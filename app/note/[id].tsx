@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native'
 import { router, useLocalSearchParams } from 'expo-router'
 import * as Haptics from 'expo-haptics'
 import { useNotesStore } from '@/store/notesStore'
@@ -90,7 +90,10 @@ export default function NoteDetailScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView 
+      style={{ flex: 1, backgroundColor: '#fff' }} 
+      contentContainerStyle={{ padding: 20, paddingTop: 60, paddingBottom: 40 }}
+    >
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Text style={styles.cancel}>Cancel</Text>
@@ -117,33 +120,34 @@ export default function NoteDetailScreen() {
         multiline
       />
       <Text style={styles.wordCount}>
-  {body.trim() === '' ? '0 words' : `${body.trim().split(/\s+/).length} words`}
-</Text>
+        {body.trim() === '' ? '0 words' : `${body.trim().split(/\s+/).length} words`}
+      </Text>
       {errors.body && <Text style={styles.errorText}>{errors.body}</Text>}
 
       {tags.length > 0 && (
         <View style={styles.tagsRow}>
           {tags.map((tag) => (
             <TouchableOpacity
-  key={tag.id}
-  onPress={() => toggleTag(tag.id)}
-  activeOpacity={1}
-  style={[
-    styles.tag,
-    selectedTags.includes(tag.id)
-      ? { backgroundColor: tag.color }
-      : { backgroundColor: '#E8E8E8' },
-  ]}
->
-  <Text style={[
-    styles.tagLabel,
-    { color: selectedTags.includes(tag.id) ? '#fff' : '#555' }
-  ]}>{tag.label}</Text>
-</TouchableOpacity>
+              key={tag.id}
+              onPress={() => toggleTag(tag.id)}
+              activeOpacity={1}
+              style={[
+                styles.tag,
+                selectedTags.includes(tag.id)
+                  ? { backgroundColor: tag.color }
+                  : { backgroundColor: '#E8E8E8' },
+              ]}
+            >
+              <Text style={[
+                styles.tagLabel,
+                { color: selectedTags.includes(tag.id) ? '#fff' : '#555' }
+              ]}>{tag.label}</Text>
+            </TouchableOpacity>
           ))}
         </View>
       )}
- <TouchableOpacity style={styles.imageButton} onPress={handlePickImage}>
+
+      <TouchableOpacity style={styles.imageButton} onPress={handlePickImage}>
         <Text style={styles.imageButtonText}>
           {imageUrl ? 'Change Image' : '+ Add Image'}
         </Text>
@@ -155,12 +159,12 @@ export default function NoteDetailScreen() {
           style={styles.imagePreview}
           resizeMode="cover"
         />
-      )}      
+      )}
 
       <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
         <Text style={styles.deleteText}>Delete Note</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   )
 }
 

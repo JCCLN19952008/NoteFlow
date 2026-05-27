@@ -4,7 +4,7 @@ import * as Haptics from 'expo-haptics'
 import { useNotesStore, Note } from '@/store/notesStore'
 import { useState } from 'react'
 import { useTagsStore } from '@/store/tagsStore'
-import { View, Text, TouchableOpacity, StyleSheet, Alert, TextInput } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, Alert, TextInput, Image } from 'react-native'
 
 function NoteCard({ note }: { note: Note }) {
   const deleteNote = useNotesStore((state) => state.deleteNote)
@@ -45,6 +45,13 @@ function NoteCard({ note }: { note: Note }) {
       {note.pinned && <Text style={styles.pinnedLabel}>📌 Pinned</Text>}
       <Text style={styles.cardTitle} numberOfLines={1}>{note.title}</Text>
       <Text style={styles.cardBody} numberOfLines={2}>{note.body}</Text>
+      {note.imageUrl && (
+        <Image
+          source={{ uri: note.imageUrl }}
+          style={styles.cardImage}
+          resizeMode="cover"
+        />
+      )}
       {note.tags.length > 0 && (
   <View style={styles.cardTagDots}>
     {note.tags.slice(0, 5).map((tag) => (
@@ -129,8 +136,9 @@ const styles = StyleSheet.create({
   cardTags: { fontSize: 12, color: '#9E9E9E' },
   empty: { alignItems: 'center', marginTop: 80 },
   cardTagDots: { flexDirection: 'row', gap: 4, marginTop: 6 },
-cardTagDot: { width: 8, height: 8, borderRadius: 4 },
-emptyIcon: { fontSize: 48, marginBottom: 12 },
-emptyText: { fontSize: 18, fontWeight: '600', color: '#9E9E9E' },
-emptySubtext: { fontSize: 14, color: '#BDBDBD', marginTop: 6, textAlign: 'center', paddingHorizontal: 40 },
+  cardTagDot: { width: 8, height: 8, borderRadius: 4 },
+  cardImage: { width: '100%', height: 80, borderRadius: 6, marginBottom: 6 },
+  emptyIcon: { fontSize: 48, marginBottom: 12 },
+  emptyText: { fontSize: 18, fontWeight: '600', color: '#9E9E9E' },
+  emptySubtext: { fontSize: 14, color: '#BDBDBD', marginTop: 6, textAlign: 'center', paddingHorizontal: 40 },
 })
