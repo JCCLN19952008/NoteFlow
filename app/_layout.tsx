@@ -5,6 +5,8 @@ import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider'
 import { useNotesStore } from '@/store/notesStore'
 import { useTagsStore } from '@/store/tagsStore'
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth'
+import { requestNotificationPermissions, scheduleDailyReminder } from '@/services/notifications'
+
 
 export default function RootLayout() {
   const fetchNotes = useNotesStore((state) => state.fetchNotes)
@@ -27,6 +29,9 @@ export default function RootLayout() {
     } else {
       fetchNotes(user.uid)
       fetchTags(user.uid)
+      requestNotificationPermissions().then((granted) => {
+        if (granted) scheduleDailyReminder()
+      })
       router.replace('/(tabs)')
     }
   }, [user, initialising])

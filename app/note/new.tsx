@@ -6,15 +6,22 @@ import { useNotesStore } from '@/store/notesStore'
 import { useTagsStore } from '@/store/tagsStore'
 import { noteSchema } from '@/schemas/noteSchema'
 import auth from '@react-native-firebase/auth'
+import { getCurrentLocation } from '@/services/location'
+import { useEffect } from 'react'
 
 export default function NewNoteScreen() {
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [errors, setErrors] = useState<{ title?: string; body?: string }>({})
+  const [location, setLocation] = useState<string | null>(null)
 
   const addNote = useNotesStore((state) => state.addNote)
   const tags = useTagsStore((state) => state.tags)
+
+  useEffect(() => {
+    getCurrentLocation().then(setLocation)
+  }, [])
 
   const toggleTag = (id: string) => {
     setSelectedTags((prev) =>
@@ -76,23 +83,26 @@ export default function NewNoteScreen() {
         <View style={styles.tagsRow}>
           {tags.map((tag) => (
             <TouchableOpacity
-  key={tag.id}
-  onPress={() => toggleTag(tag.id)}
-  activeOpacity={1}
-  style={[
-    styles.tag,
-    selectedTags.includes(tag.id)
+        key={tag.id}
+        onPress={() => toggleTag(tag.id)}
+        activeOpacity={1}
+        style={[
+        styles.tag,
+        selectedTags.includes(tag.id)
       ? { backgroundColor: tag.color }
       : { backgroundColor: '#E8E8E8' },
   ]}
 >
-  <Text style={[
-    styles.tagLabel,
-    { color: selectedTags.includes(tag.id) ? '#fff' : '#555' }
-  ]}>{tag.label}</Text>
-</TouchableOpacity>
+     <Text style={[
+        styles.tagLabel,
+        { color: selectedTags.includes(tag.id) ? '#fff' : '#555' }
+      ]}>{tag.label}</Text>
+        </TouchableOpacity>
           ))}
         </View>
+      )}
+       {location && (
+        <Text style={styles.locationText}>📍 {location}</Text>
       )}
     </View>
   )
@@ -111,5 +121,6 @@ const styles = StyleSheet.create({
   wordCount: { fontSize: 11, color: '#BDBDBD', textAlign: 'right', marginBottom: 8 },
   tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16 },
   tag: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, marginRight: 6, marginBottom: 6 },
-tagLabel: { fontSize: 13, fontWeight: '600' },
+  tagLabel: { fontSize: 13, fontWeight: '600' },
+  locationText: { fontSize: 12, color: '#9E9E9E', marginTop: 12 },
 })

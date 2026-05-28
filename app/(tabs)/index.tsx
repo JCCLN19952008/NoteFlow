@@ -5,6 +5,9 @@ import { useNotesStore, Note } from '@/store/notesStore'
 import { useState } from 'react'
 import { useTagsStore } from '@/store/tagsStore'
 import { View, Text, TouchableOpacity, StyleSheet, Alert, TextInput, Image } from 'react-native'
+import Animated, { FadeInDown } from 'react-native-reanimated'
+import { GestureDetector, Gesture } from 'react-native-gesture-handler'
+
 
 function NoteCard({ note }: { note: Note }) {
   const deleteNote = useNotesStore((state) => state.deleteNote)
@@ -34,6 +37,7 @@ function NoteCard({ note }: { note: Note }) {
   }
 
   return (
+    <Animated.View entering={FadeInDown.duration(300)}>
     <TouchableOpacity
       style={[styles.card, note.pinned && styles.cardPinned]}
       onPress={() => {
@@ -63,6 +67,7 @@ function NoteCard({ note }: { note: Note }) {
   {new Date(note.updatedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
 </Text>
     </TouchableOpacity>
+    </Animated.View>
   )
 }
 
