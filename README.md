@@ -18,7 +18,10 @@ Una aplicación "light-weight", unicamente concentrada en la toma de notas cotid
 | FlashList | Renderizado de la las notas  |
 | TypeScript | Lenguaje de Programcion con checkeado de seguridad |
 | Expo Image Picker | Selección de imágenes del dispositivo |
-
+| Reactive Native Reanimated | IAnimaciones de UI, en el caso que nos ocupa , "fading" de las notas que no contienen imaganes adjuntas  |
+| Expo Geolocation | Geolocalizacion automática del dispositivo  |
+| React Native Gesture Handler  | Gestión nativa de los gestos táctiles, en especial pulsado prolongado con vibración |
+| Expo Notification | Notificaciones diarias de la aplicación para la concesión de permisos |
 ---
 
 ##  Los Features
@@ -31,7 +34,7 @@ Una aplicación "light-weight", unicamente concentrada en la toma de notas cotid
 - Autenticación gestionada a través de Firebase Auth : Cada usuario tiene un UID unico provisto por Firebase que permite el filtrado de datos en la base de datos Neon.
 
 
-### Notes
+### Notas
 
 - Crear , borrar y deitar notas, tanot en el titulo como en el cuerpo.
 - Busqueda con filtrado de la nota.
@@ -39,6 +42,7 @@ Una aplicación "light-weight", unicamente concentrada en la toma de notas cotid
 - "Timestamp" para verificar la fecha de ultima edicion de la nota.
 - Hacer "pin" a la nota que lo requiera para que merpanzeca en lo mas visible de la interfaz
 - "Long press" de una nota almcaenada con el fin de editar o borrarla.
+- Animación de entrada (fade-in) al cargar la lista de notas(solo las que no contienen imagenes adjuntas), implementada con React Native Reanimated
 - Adjuntar una imagen a cualquier nota — la imagen se almacena en AWS S3 especificamente configurado por medio de permisos y acceso publico  y se muestra como un "thumbnail" en la lista de notas.
 
 ![Screenshot-NotesWindow](assets/screenshots/Screenshot-NotesWindow.png)
@@ -51,6 +55,20 @@ Una aplicación "light-weight", unicamente concentrada en la toma de notas cotid
 ![Screenshot-Search](assets/screenshots/Screenshot-Search.png)
 
 ![Screenshot-NotesPinned](assets/screenshots/Screenshot-NotesPinned.png)
+
+### Geolocalizacióm
+
+- Al crear una nueva nota se pide inmediatamente al usuario la concesión de permisos.
+- En el formulario de la nota se añade un pequeño pin que indica la localizacion de manera automatica del dispositivo.
+- Se ha implementado usando Expo Location y "reverse geo-coding".
+- La geolocalización no funciona de manera fiable en el Pixel 14(API 34) emulado en Android Studio, problemas ya de sobra reportados en la comunidad, el codigo y la implementacion de los plugíns y librerias no presetnan ningun error fatal que impidiera su testeo apropiado en un dispositivo fisico.
+
+### Notificaciones
+- Al iniciar sesión, la app solicita el permiso de notificaciones.
+- Se programa un recordatorio diario automático(cada 24 horas) para que el usuario recuerde revisar sus notas.
+- Fundionalidad implementada con  Expo Notifications usando triggers de intervalo de tiempo.
+- Las notificaciones no se ejecutan si dentro de un mismo plazo de 24 horas no se han añadido nuevas notas.
+
 
 ### Tags
 - Crear un "tag" con un nombre y el color que se desee segun el tipo de nota.
