@@ -7,7 +7,9 @@ import { useTagsStore } from '@/store/tagsStore'
 import { View, Text, TouchableOpacity, StyleSheet, Alert, TextInput, Image } from 'react-native'
 import Animated, { FadeInDown } from 'react-native-reanimated'
 import { GestureDetector, Gesture } from 'react-native-gesture-handler'
-
+import { useFocusEffect } from 'expo-router'
+import { useCallback } from 'react'
+import auth from '@react-native-firebase/auth'
 
 function NoteCard({ note }: { note: Note }) {
   const deleteNote = useNotesStore((state) => state.deleteNote)
@@ -73,13 +75,20 @@ function NoteCard({ note }: { note: Note }) {
 
 export default function NotesScreen() {
   const notes = useNotesStore((state) => state.notes)
+  const fetchNotes = useNotesStore((state) => state.fetchNotes)
+
+  useFocusEffect(
+    useCallback(() => {
+      const userId = auth().currentUser?.uid
+      if (userId) fetchNotes(userId)
+    }, [])
+  )
   const sortedNotes = [...notes].sort((a, b) => {
     if (a.pinned && !b.pinned) return -1
     if (!a.pinned && b.pinned) return 1
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   })
 
-  
   const [search, setSearch] = useState('')
 
 const filteredNotes = sortedNotes.filter((note) =>

@@ -29,9 +29,11 @@ export default function RootLayout() {
     } else {
       fetchNotes(user.uid)
       fetchTags(user.uid)
-      requestNotificationPermissions().then((granted) => {
-        if (granted) scheduleDailyReminder()
-      })
+      setTimeout(() => {
+        requestNotificationPermissions().then((granted) => {
+          if (granted) scheduleDailyReminder()
+        })
+      }, 2000)
       router.replace('/(tabs)')
     }
   }, [user, initialising])
