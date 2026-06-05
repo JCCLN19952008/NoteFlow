@@ -29,11 +29,14 @@ export default function RootLayout() {
     } else {
       fetchNotes(user.uid)
       fetchTags(user.uid)
-      setTimeout(() => {
-        requestNotificationPermissions().then((granted) => {
-          if (granted) scheduleDailyReminder()
-        })
-      }, 2000)
+      setTimeout(async () => {
+        try {
+          const granted = await requestNotificationPermissions()
+          if (granted) await scheduleDailyReminder()
+        } catch (e) {
+          console.log('Notification setup error:', e)
+        }
+      }, 3000)
       router.replace('/(tabs)')
     }
   }, [user, initialising])

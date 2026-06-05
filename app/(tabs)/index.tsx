@@ -79,8 +79,10 @@ export default function NotesScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      const userId = auth().currentUser?.uid
-      if (userId) fetchNotes(userId)
+      const unsubscribe = auth().onAuthStateChanged((user) => {
+        if (user) fetchNotes(user.uid)
+      })
+      return unsubscribe
     }, [])
   )
   const sortedNotes = [...notes].sort((a, b) => {
