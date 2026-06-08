@@ -1,5 +1,7 @@
 # NoteFlow
 
+[![NoteFlow CI](https://github.com/JCCLN19952008/NoteFlow/actions/workflows/ci.yml/badge.svg)](https://github.com/JCCLN19952008/NoteFlow/actions/workflows/ci.yml)
+
 Una aplicación "light-weight", unicamente concentrada en la toma de notas cotidianas puntuales, desarrollada empleando   React Native y  Expo. Desde un comienzo esta conecbida para ser pequeña, minima y  persistente para el usuario — las notas almacenadas persistenlas notas almacenadas persisten en la nube via una API REST respaldada por una base de datos PostgreSQL.
 
 ---
